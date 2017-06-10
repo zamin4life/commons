@@ -5,9 +5,11 @@ object CommonsBuild {
   val settings: Seq[Setting[_]] = Seq(
     organization := "im.actor",
     organizationHomepage := Some(new URL("https://actor.im/")),
-    scalaVersion := "2.11.8",
+    scalaVersion := "2.11.11",
     resolvers ++= Seq(
-      Resolver.sonatypeRepo("releases")
+      Resolver.sonatypeRepo("releases"),
+      "Nexus DiegoSilva Releases" at "http://nexus.diegosilva.com.br:8081/nexus/content/repositories/releases/",
+      "Nexus DiegoSilva Snapshots" at "http://nexus.diegosilva.com.br:8081/nexus/content/repositories/snapshots/"
     ),
     pomExtra := (
       <url>http://github.com/actorapp/actor-commons</url>
