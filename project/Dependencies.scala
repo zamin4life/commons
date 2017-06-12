@@ -2,11 +2,11 @@ import sbt._
 import Keys._
 
 object V {
-  val Akka = "2.5.2"
+  val Akka = "2.4.11.2"
   val Scalatest = "2.2.4"
   val Slick = "3.1.1"
   val SlickPg = "0.14.3"
-  val Cats = "0.9.0"
+  val Cats = "0.7.2"
 }
 
 object Dependencies {

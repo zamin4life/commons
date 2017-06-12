@@ -1,14 +1,15 @@
 package im.actor.cats
 
 import cats._
+import cats.data.Xor
 import cats.syntax.all._
-import slick.dbio.{ DBIO, FailureAction, SuccessAction }
+import slick.dbio.{DBIO, FailureAction, SuccessAction}
 
-import scala.concurrent.{Future, ExecutionContext}
+import scala.concurrent.{ExecutionContext, Future}
 
 object dbio extends DBIOInstances
 
-trait DBIOInstances extends DBIOInstances1 with ActorMonad{
+trait DBIOInstances extends DBIOInstances1{
 
   implicit def DBIOInstance(implicit ec: ExecutionContext): MonadError[DBIO, Throwable] with CoflatMap[DBIO] =
     new DBIOCoflatMap with MonadError[DBIO, Throwable] {
@@ -29,10 +30,10 @@ trait DBIOInstances extends DBIOInstances1 with ActorMonad{
           case FailureAction(t)   ⇒ f(t)
         }
 
-      override def attempt[A](fa: DBIO[A]): DBIO[Throwable Either A] =
+      override def attempt[A](fa: DBIO[A]): DBIO[Throwable Xor A] =
         fa map {
-          case SuccessAction(res) ⇒ Right(res.asInstanceOf[A])
-          case FailureAction(t)   ⇒ Left(t)
+          case SuccessAction(res) ⇒ Xor.right(res.asInstanceOf[A])
+          case FailureAction(t)   ⇒ Xor.left(t)
         }
 
       override def recover[A](fa: DBIO[A])(pf: PartialFunction[Throwable, A]): DBIO[A] =
