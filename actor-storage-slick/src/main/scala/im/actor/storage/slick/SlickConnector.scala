@@ -1,20 +1,17 @@
 package im.actor.storage.slick
 
-import com.github.tminglei.slickpg._
 import im.actor.storage.Connector
 import im.actor.storage.api._
+import im.actor.storage.slick.MyPostgresProfile.api._
 import org.slf4j.LoggerFactory
+import slick.jdbc.GetResult
 
 import scala.collection.mutable
 import scala.concurrent.duration._
 import scala.concurrent.{Await, ExecutionContext, Future}
 
-private object Driver extends ExPostgresDriver
-import im.actor.storage.slick.Driver.api._
-
 class SlickConnector(db: Database)(implicit ec: ExecutionContext) extends Connector {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
   private val tables = mutable.Set.empty[String]
 
   override def runSync[R](action: Action[R])(implicit timeout: FiniteDuration): R =
@@ -39,12 +36,13 @@ class SlickConnector(db: Database)(implicit ec: ExecutionContext) extends Connec
       Await.result(
         db.run(sqlu"""CREATE TABLE IF NOT EXISTS #$tName (key TEXT, value BYTEA, PRIMARY KEY (key))""") map (_ => ()),
         10 seconds)
-//      log.debug("Created table: {}", tName)
       tables += name
     }
   }
 
   private def tableName(name: String) = s"kv_$name"
+
+  implicit val getByteArray = GetResult(r ⇒ r.nextBytes())
 
   private def get(name: String, key: String): Future[Option[Array[Byte]]] =
     db.run(sql"""SELECT value FROM #${tableName(name)} WHERE key = $key""".as[Array[Byte]].headOption)
@@ -56,11 +54,11 @@ class SlickConnector(db: Database)(implicit ec: ExecutionContext) extends Connec
     val tName = tableName(name)
     val action: DBIO[Int] = for {
       count <- sql"SELECT COUNT(*) FROM #$tName WHERE KEY = $key".as[Int]
-      exists = count.headOption.exists(_>0)
-      result <- if(exists)
-          sqlu"UPDATE #$tName SET value = $value WHERE key = $key"
-        else
-          sqlu"INSERT INTO #$tName VALUES ($key, $value)"
+      exists = count.headOption.exists(_ > 0)
+      result <- if (exists)
+        sqlu"UPDATE #$tName SET value = $value WHERE key = $key"
+      else
+        sqlu"INSERT INTO #$tName VALUES ($key, $value)"
 
     } yield result
     db.run(action.transactionally)

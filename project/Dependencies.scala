@@ -2,10 +2,10 @@ import sbt._
 import Keys._
 
 object V {
-  val Akka = "2.4.19"
+  val Akka = "2.5.11"
   val Scalatest = "2.2.4"
-  val Slick = "3.1.1"
-  val SlickPg = "0.14.3"
+  val Slick = "3.2.3"
+  val SlickPg = "0.18.0"
   val Cats = "0.7.2"
 }
 
