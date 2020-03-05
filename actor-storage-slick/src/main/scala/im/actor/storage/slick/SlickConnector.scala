@@ -42,8 +42,6 @@ class SlickConnector(db: Database)(implicit ec: ExecutionContext) extends Connec
 
   private def tableName(name: String) = s"kv_$name"
 
-  implicit val getByteArray = GetResult(r ⇒ r.nextBytes())
-
   private def get(name: String, key: String): Future[Option[Array[Byte]]] =
     db.run(sql"""SELECT value FROM #${tableName(name)} WHERE key = $key""".as[Array[Byte]].headOption)
 

@@ -20,7 +20,8 @@ trait MyPostgresProfile extends ExPostgresProfile
 
   override val api = MyAPI
 
-  object MyAPI extends API with ArrayImplicits
+  object MyAPI extends API with ByteaPlainImplicits
+    with ArrayImplicits
     with DateTimeImplicits
     with NetImplicits
     with LTreeImplicits
